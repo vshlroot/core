@@ -15,6 +15,13 @@ public class Generics<T> {
     // It can be used just like any other data type like int or Integer or any class variable.
 
     private T var;
+    public Generics() {
+
+    }
+    public Generics(T var) {
+        this.var = var;
+    }
+
 
     //Notice how T is being used as a return type also, just like any other variable.
     public T getVar() {
@@ -24,6 +31,18 @@ public class Generics<T> {
     public void setVar(T var) {
         this.var = var;
     }
+
+    public String toString(){
+        // Usually returns
+        //getClass().getName() + '@' + Integer.toHexString(hashCode())
+
+        // We are returning the toString() method for var.
+        // If var is some other class object then now it is it's responsibility to return correct value.
+        //
+        // var can't be some primitive type hence no need to worry about the primitive types.
+        return var.toString();
+    }
+
 
     // Using Generics
     public static void main(String[] args) {
