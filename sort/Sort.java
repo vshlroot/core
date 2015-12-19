@@ -187,6 +187,7 @@ public class Sort {
 
 //===============================================================================
 // Merges two different arrays and returns a single sorted array.
+// First one will be max and second one will be min and so on.
 //===============================================================================
     public static <T extends Comparable<T>> T[] merge(T[] array1, T[] array2){
         T[] array3=(T[])Array.newInstance(array1[0].getClass(),array1.length+array2.length);
@@ -201,6 +202,31 @@ public class Sort {
         merge(array3,0,array1.length-1,array3.length);
         return array3;
     }
+
+//===============================================================================
+// Wiggle Sort, in place
+//===============================================================================
+
+    public static <T extends Comparable<T>> void wiggleSort(T[] array){
+        T temp;
+        for(int i=0;i<array.length-1;i++){
+            if(i%2==0){ //even ones will be max
+                if(array[i].compareTo(array[i+1])<0){
+                    temp=array[i];
+                    array[i]=array[i+1];
+                    array[i+1]=temp;
+                }
+            }
+            else{
+                if(array[i].compareTo(array[i+1])>0){
+                    temp=array[i];
+                    array[i]=array[i+1];
+                    array[i+1]=temp;
+                }
+            }
+        }
+    }
+
 //===============================================================================
 // Function to print the values of the array.
 // In case of class objects, the class itself should override the toString method of Object class.
