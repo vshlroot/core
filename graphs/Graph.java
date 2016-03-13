@@ -121,6 +121,7 @@ public class Graph {
 
         for (int i = 0; i < visited.length; i++) {
             visited[i]=false;
+            processed[i]=false;
         }
         Queue<Integer> q=new LinkedList<>();
         q.add(root);
@@ -129,18 +130,33 @@ public class Graph {
         EdgeNode edge;
         while(!q.isEmpty()){
             currentIndex=q.remove();
-            System.out.println(vertices[currentIndex]);
+            processVertexEarly(currentIndex);
             processed[currentIndex]=true;
             edge=edges[currentIndex];
             while(edge!=null){
                 if(!visited[edge.y]) {
                     visited[edge.y]=true;
+                    processEdge(currentIndex,edge.y);
                     q.add(edge.y);
                 }
                 edge = edge.next;
             }
+            processVertexLate(currentIndex);
         }
     }
+
+    public void processVertexEarly(int index){
+        System.out.println(vertices[index]);
+    }
+
+    public void processVertexLate(int index){
+        //System.out.println(vertices[index]);
+    }
+
+    public void processEdge(int x,int y){
+        //System.out.println(vertices[index]);
+    }
+
 
     public void bfs(int root){
         if(root<0){
@@ -155,6 +171,7 @@ public class Graph {
 
         for (int i = 0; i < visited.length; i++) {
             visited[i]=false;
+            processed[i]=false;
         }
         Stack<Integer> s=new Stack<>();
         s.push(root);
@@ -163,16 +180,18 @@ public class Graph {
         EdgeNode edge;
         while(!s.isEmpty()){
             currentIndex=s.pop();
-            System.out.println(vertices[currentIndex]);
+            processVertexEarly(currentIndex);
             processed[currentIndex]=true;
             edge=edges[currentIndex];
             while(edge!=null){
                 if(!visited[edge.y]) {
                     visited[edge.y]=true;
+                    processEdge(currentIndex,edge.y);
                     s.push(edge.y);
                 }
                 edge = edge.next;
             }
+            processVertexLate(currentIndex);
         }
     }
 
