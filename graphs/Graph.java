@@ -1,5 +1,9 @@
 package graphs;
 
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Stack;
+
 /**
  * Created by vishalss on 3/12/2016.
  */
@@ -38,7 +42,7 @@ public class Graph {
         EdgeNode newEdge=new EdgeNode(y,weight,edges[x]);
         edges[x]=newEdge;
         degree[x]++;
-        System.out.println("NEW DEGREE= "+degree[x]);
+        //System.out.println("NEW DEGREE= "+degree[x]);
         if(!directed){
             insertEdge(y,x,weight,true);        // passing true to break infinite loop.
         }
@@ -58,7 +62,7 @@ public class Graph {
         }
         initializeVertex(data);
         numberOfVertices++;
-        System.out.println("numberOfVertices"+numberOfVertices);
+        //System.out.println("numberOfVertices"+numberOfVertices);
     }
 
     public void initializeVertex(Object data){
@@ -67,21 +71,8 @@ public class Graph {
         degree[numberOfVertices]=0;
     }
 
-    public void printGraph(){
-        EdgeNode nextEdge;
-        for (int i = 0; i < numberOfVertices; i++) {
-            System.out.print(degree[i]+"    "+vertices[i]+"-->");
-            nextEdge=edges[i];
-            while(nextEdge!=null){
-                System.out.print(vertices[nextEdge.y]+"-->");
-                nextEdge=nextEdge.next;
-            }
-            System.out.print("X");
-            System.out.println();
-        }
-    }
-
-    public static void main(String[] args) {
+    // Will create graph of MAXV=6
+    public static Graph createDummyGraph(){
         Graph g=new Graph(6);
         g.insertVertex(0);
         g.insertVertex(1);
@@ -100,9 +91,100 @@ public class Graph {
         g.insertEdge(2,4,1,false);
         g.insertEdge(2,5,1,false);
         g.insertEdge(3,5,1,false);
+        return g;
+    }
+
+    public void printGraph(){
+        EdgeNode nextEdge;
+        for (int i = 0; i < numberOfVertices; i++) {
+            System.out.print(degree[i]+"    "+vertices[i]+"-->");
+            nextEdge=edges[i];
+            while(nextEdge!=null){
+                System.out.print(vertices[nextEdge.y]+"-->");
+                nextEdge=nextEdge.next;
+            }
+            System.out.print("X");
+            System.out.println();
+        }
+    }
+
+    public void dfs(int root){
+        if(root<0){
+            System.out.println("Invalid root");
+            return;
+        }
+        if(numberOfVertices<=0){
+            return;
+        }
+        boolean visited[]=new boolean[numberOfVertices];
+        boolean processed[]=new boolean[numberOfVertices];
+
+        for (int i = 0; i < visited.length; i++) {
+            visited[i]=false;
+        }
+        Queue<Integer> q=new LinkedList<>();
+        q.add(root);
+        visited[root]=true;
+        int currentIndex;
+        EdgeNode edge;
+        while(!q.isEmpty()){
+            currentIndex=q.remove();
+            System.out.println(vertices[currentIndex]);
+            processed[currentIndex]=true;
+            edge=edges[currentIndex];
+            while(edge!=null){
+                if(!visited[edge.y]) {
+                    visited[edge.y]=true;
+                    q.add(edge.y);
+                }
+                edge = edge.next;
+            }
+        }
+    }
+
+    public void bfs(int root){
+        if(root<0){
+            System.out.println("Invalid root");
+            return;
+        }
+        if(numberOfVertices<=0){
+            return;
+        }
+        boolean visited[]=new boolean[numberOfVertices];
+        boolean processed[]=new boolean[numberOfVertices];
+
+        for (int i = 0; i < visited.length; i++) {
+            visited[i]=false;
+        }
+        Stack<Integer> s=new Stack<>();
+        s.push(root);
+        visited[root]=true;
+        int currentIndex;
+        EdgeNode edge;
+        while(!s.isEmpty()){
+            currentIndex=s.pop();
+            System.out.println(vertices[currentIndex]);
+            processed[currentIndex]=true;
+            edge=edges[currentIndex];
+            while(edge!=null){
+                if(!visited[edge.y]) {
+                    visited[edge.y]=true;
+                    s.push(edge.y);
+                }
+                edge = edge.next;
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        Graph g=Graph.createDummyGraph();
 
         g.printGraph();
 
+        System.out.println("DFS:");
+        g.dfs(4);
 
+        System.out.println("BFS:");
+        g.bfs(4);
     }
 }
