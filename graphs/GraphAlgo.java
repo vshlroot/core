@@ -73,11 +73,68 @@ public class GraphAlgo {
         return path;
     }
 
+    public int numberOfConnectedComponents(Graph g){
+        ArrayList connectedComponents=getConnectedComponents(g);
+        return connectedComponents ==null?0: connectedComponents.size();
+    }
+
+    public ArrayList getConnectedComponents(Graph g){
+        if(g==null || g.getNumberOfVertices()==0){
+            return null;
+        }
+        ArrayList<ArrayList<Integer>> result=new ArrayList<>();
+
+        boolean visited[]=new boolean[g.getNumberOfVertices()];
+        for (int i = 0; i <visited.length ; i++) {
+            visited[i]=false;
+        }
+
+        ArrayList currentComponent;
+        for (int i = 0; i < visited.length; i++) {
+            if(visited[i]==false){
+                currentComponent=findConnectedComponentFrom(g,i,visited);
+                result.add(currentComponent);
+            }
+        }
+        return result;
+    }
+
+    // running BFS
+    public ArrayList<Integer> findConnectedComponentFrom(Graph g,int index,boolean[] visited ){
+        System.out.println("visited.length"+visited.length);
+        ArrayList<Integer> components=new ArrayList<>();
+        Queue<Integer> q=new LinkedList<>();
+        q.add(index);
+        visited[index]=true;
+
+        EdgeNode edge;
+        int currentVertex;
+        while (!q.isEmpty()) {
+            currentVertex=q.remove();
+            components.add(currentVertex);
+            edge=g.getEdgeList(currentVertex);
+            while (edge != null) {
+                if(!visited[edge.y]){
+                    visited[edge.y]=true;
+                    q.add(edge.y);
+                }
+                edge = edge.next;
+            }
+        }
+        return components;
+    }
+
     public static void main(String[] args) {
         Graph g=Graph.createDummyGraph();
         GraphAlgo algo=new GraphAlgo();
         ArrayList<Integer> path=algo.shortestPath(g, 0, 5);
         System.out.println("Shortest Path is:");
         System.out.println(path);
+
+        Graph g1=Graph.createDummyGraphUnconnected();
+        System.out.println(g1.getNumberOfVertices());
+        System.out.println(algo.numberOfConnectedComponents(g1));
+        System.out.println(algo.getConnectedComponents(g1));
+
     }
 }
