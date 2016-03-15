@@ -124,6 +124,47 @@ public class GraphAlgo {
         return components;
     }
 
+    // Will use BFS. Our exploration will radiate out rather than pierce.
+    // Will start from the root vertex.
+    // Will consider graph with single Connected component
+    // Future: Will work for more than one connected components
+    public boolean isGraphTwoColorable(Graph g){
+        if(g==null){
+            return false;
+        }
+        if(g.getNumberOfVertices()<2)
+            return true;
+
+        int color[]=new int[g.getNumberOfVertices()];
+        for (int i = 0; i < g.getNumberOfVertices(); i++) {
+
+            color[i]=-1;
+        }
+        Queue<Integer> q=new LinkedList<>();
+
+        EdgeNode edge;
+        int currentVertex;
+        q.add(0);
+        color[0]=0;
+        while(!q.isEmpty()){
+            currentVertex=q.remove();
+            edge=g.getEdgeList(currentVertex);
+            while(edge!=null){
+                if(color[edge.y]==-1) {
+                    color[edge.y] = 1-color[currentVertex]; // Neet trick, isn't it...
+                    q.add(edge.y);
+                }
+                else if(color[edge.y]==color[currentVertex]){
+                    System.out.println(currentVertex);
+                    System.out.println(edge.y);
+                    return false;
+                }
+                edge=edge.next;
+            }
+        }
+        return true;
+    }
+
     public static void main(String[] args) {
         Graph g=Graph.createDummyGraph();
         GraphAlgo algo=new GraphAlgo();
@@ -136,5 +177,7 @@ public class GraphAlgo {
         System.out.println(algo.numberOfConnectedComponents(g1));
         System.out.println(algo.getConnectedComponents(g1));
 
+        System.out.println("Is colorable:");
+        System.out.println(algo.isGraphTwoColorable(g));
     }
 }
