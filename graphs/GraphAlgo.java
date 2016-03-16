@@ -165,6 +165,47 @@ public class GraphAlgo {
         return true;
     }
 
+    // Checks for a cycle using DFS
+    // Starts from root 0
+    public boolean cycleExists(Graph g){
+        if(g==null || g.getNumberOfVertices()<=1){
+            return false;
+        }
+        boolean discovered[]=new boolean[g.getNumberOfVertices()];
+        int parent[]=new int[g.getNumberOfVertices()];
+
+        for (int i = 0; i < discovered.length; i++) {
+            discovered[i]=false;
+            parent[i]=-1;
+        }
+        Stack<Integer> s=new Stack<>();
+        s.push(0);
+        discovered[0]=true;
+        int currentVertex;
+        EdgeNode edge;
+        while (!s.isEmpty()){
+            currentVertex=s.pop();
+            discovered[currentVertex]=true;
+            edge=g.getEdgeList(currentVertex);
+            while (edge!=null){
+                if(discovered[edge.y] && edge.y!=parent[currentVertex]){
+                    System.out.println(currentVertex);
+                    System.out.println(edge.y);
+                    System.out.println(parent[currentVertex]);
+                    return true;
+                }
+                if(!discovered[edge.y]) {
+                    s.push(edge.y);
+                    discovered[edge.y] = true;
+                    parent[edge.y] = currentVertex;
+                }
+                edge = edge.next;
+            }
+
+        }
+        return false;
+    }
+
     public static void main(String[] args) {
         Graph g=Graph.createDummyGraph();
         GraphAlgo algo=new GraphAlgo();
@@ -179,5 +220,8 @@ public class GraphAlgo {
 
         System.out.println("Is colorable:");
         System.out.println(algo.isGraphTwoColorable(g));
+
+        System.out.println("Cycle Exists");
+        System.out.println(algo.cycleExists(g));
     }
 }
