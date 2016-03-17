@@ -25,8 +25,6 @@ public class GraphAlgo {
             System.out.println("Invalid input: Empty Graph");
             return null;
         }
-        ArrayList<Integer> path =new ArrayList<>();
-        Stack<Integer> s= new Stack<>();
 
         // Running BFS
         Queue<Integer> q=new LinkedList<>();
@@ -58,9 +56,14 @@ public class GraphAlgo {
                 edge=edge.next;
             }
         }
-
         //fetching the path
-        int vertex=y;
+        return printPath(parent,y);
+    }
+
+    // Provided a parent array prints the path from source node to a node.
+    public ArrayList<Integer> printPath(int[] parent, int vertex){
+        ArrayList<Integer> path =new ArrayList<>();
+        Stack<Integer> s= new Stack<>();
         s.push(vertex);
         while (parent[vertex]!=-1){
             vertex=parent[vertex];
@@ -72,6 +75,7 @@ public class GraphAlgo {
         }
         return path;
     }
+
 
     public int numberOfConnectedComponents(Graph g){
         ArrayList connectedComponents=getConnectedComponents(g);
