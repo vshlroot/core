@@ -105,7 +105,7 @@
             degree[numberOfVertices]=0;
         }
 
-        // Will create graph of MAXV=6
+        // Will create graph of MAXV=6 with one connected component.
         public static Graph createDummyGraph(){
             Graph g=new Graph(6);
             g.insertVertex(0);
@@ -117,6 +117,43 @@
 
 
             System.out.println("Inserting edges");
+/*
+            g.insertEdge(0,1,1,false);
+            g.insertEdge(0,2,1,false);
+            //g.insertEdge(1,2,1,false);
+            g.insertEdge(1,3,1,false);
+            g.insertEdge(2,4,1,false);
+            g.insertEdge(2,5,1,false);
+            g.insertEdge(3,5,1,false);
+
+            */
+            g.insertEdge(0,1,1,false);
+            g.insertEdge(1,2,1,false);
+            g.insertEdge(2,3,1,false);
+            //g.insertEdge(3,4,1,false);
+            g.insertEdge(4,5,1,false);
+            g.insertEdge(5,1,1,false);
+            return g;
+        }
+
+
+        // Will create graph of MAXV=6 with 3 connected component.
+        public static Graph createDummyGraphUnconnected(){
+            Graph g=new Graph(11);
+            g.insertVertex(0);
+            g.insertVertex(1);
+            g.insertVertex(2);
+            g.insertVertex(3);
+            g.insertVertex(4);
+            g.insertVertex(5);
+            g.insertVertex(6);
+            g.insertVertex(7);
+            g.insertVertex(8);
+            g.insertVertex(9);
+            g.insertVertex(10);
+
+
+            System.out.println("Inserting edges");
 
             g.insertEdge(0,1,1,false);
             g.insertEdge(0,2,1,false);
@@ -124,9 +161,13 @@
             g.insertEdge(1,3,1,false);
             g.insertEdge(2,4,1,false);
             g.insertEdge(2,5,1,false);
-            g.insertEdge(3,5,1,false);
+            g.insertEdge(6,7,1,false);
+            g.insertEdge(8,9,1,false);
+            g.insertEdge(9,10,1,false);
+
             return g;
         }
+
 
         public void printGraph(){
             EdgeNode nextEdge;
@@ -142,7 +183,7 @@
             }
         }
 
-        // Runs BFS on graph, uses Stack
+        // Runs BFS on graph, uses Queue
         // Edit processVertexEarly, processVertexLate and processEdge to modify the processing order
         public void bfs(int root){
             if(root<0){
@@ -193,9 +234,10 @@
             //System.out.println(vertices[index]);
         }
 
-        // Runs DFS on graph, uses Queue
+        // Runs DFS on graph, uses recursion
         // Edit processVertexEarly, processVertexLate and processEdge to modify the processing order
-        public void dfs(int root){
+        // For now I don't think iterative way of running DFS is there...We'll see...
+        public void dfs(int root,boolean[] visited){
             if(root<0){
                 System.out.println("Invalid root");
                 return;
@@ -203,33 +245,19 @@
             if(numberOfVertices<=0){
                 return;
             }
-            boolean visited[]=new boolean[numberOfVertices];
-            boolean processed[]=new boolean[numberOfVertices];
-
-            for (int i = 0; i < visited.length; i++) {
-                visited[i]=false;
-                processed[i]=false;
-            }
-            Stack<Integer> s=new Stack<>();
-            s.push(root);
             visited[root]=true;
-            int currentIndex;
             EdgeNode edge;
-            while(!s.isEmpty()){
-                currentIndex=s.pop();
-                processVertexEarly(currentIndex);
-                processed[currentIndex]=true;
-                edge=edges[currentIndex];
-                while(edge!=null){
-                    if(!visited[edge.y]) {
-                        visited[edge.y]=true;
-                        processEdge(currentIndex,edge.y);
-                        s.push(edge.y);
-                    }
-                    edge = edge.next;
+            processVertexEarly(root);
+            edge=edges[root];
+            while(edge!=null){
+                if(!visited[edge.y]) {
+                    visited[edge.y]=true;
+                    processEdge(root,edge.y);
+                    dfs(edge.y,visited);
                 }
-                processVertexLate(currentIndex);
+                edge = edge.next;
             }
+            processVertexLate(root);
         }
 
         public static void main(String[] args) {
@@ -238,9 +266,10 @@
             g.printGraph();
 
             System.out.println("DFS:");
-            g.dfs(4);
+            boolean visited[]=new boolean[g.getNumberOfVertices()];
+            g.dfs(0,visited);
 
-            System.out.println("BFS:");
-            g.bfs(4);
+//            System.out.println("BFS:");
+  //          g.bfs(4);
         }
     }
