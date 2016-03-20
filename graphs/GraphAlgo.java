@@ -274,6 +274,52 @@ public class GraphAlgo {
             }
     }
 
+    // Assumption: Graph should be a DAG
+
+    public ArrayList<Integer> topologicalSort(Graph g, int root){
+        if(g==null || g.getNumberOfVertices()<1)
+            return null;
+        if(root>=g.getNumberOfVertices()){
+            System.out.println("INVALID INPUT");
+            return null;
+        }
+        boolean[] visited=new boolean[g.getNumberOfVertices()];
+        int parent[]=new int[g.getNumberOfVertices()];
+        for (int i = 0; i < parent.length; i++) {
+            parent[i]=-1;
+        }
+        Stack<Integer> s=new Stack<>();
+        runDfsForTopologicalSort(g, root, visited, parent, s);
+        System.out.println("Checking for others");
+        for (int i = 0; i < g.getNumberOfVertices(); i++) {
+            if(!visited[i]){
+                runDfsForTopologicalSort(g, i, visited, parent, s);
+            }
+        }
+        ArrayList<Integer> result=new ArrayList<>();
+        while ((!s.isEmpty())){
+            result.add(s.pop());
+        }
+        return result;
+    }
+
+    public boolean runDfsForTopologicalSort(Graph g,int root, boolean[] visited,int[] parent, Stack<Integer> s){
+        visited[root]=true;
+        EdgeNode edge=g.getEdgeList(root);
+        while (edge!=null){
+            if(visited[edge.y]){
+                edge=edge.next;
+                continue;
+            }
+            parent[edge.y]=root;
+            if(runDfsForTopologicalSort(g,edge.y,visited,parent,s))
+                return true;
+            edge=edge.next;
+        }
+        s.push(root);
+        return false;
+    }
+
     public static void main(String[] args) {
         Graph g=Graph.createDummyGraph();
         GraphAlgo algo=new GraphAlgo();
@@ -294,5 +340,11 @@ public class GraphAlgo {
 
         System.out.println("Articulation Points");
         System.out.println(algo.findArticulationVertices(g));
+
+
+        Graph dag=Graph.createDummyDAG();
+        System.out.println("===========================");
+        System.out.println("Topological Sort");
+        System.out.println(algo.topologicalSort(dag,5));
     }
 }
