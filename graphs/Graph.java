@@ -190,13 +190,22 @@
             g.insertEdge(2,5,1,false);
             g.insertEdge(3,5,1,false);
 
-            */
+
             g.insertEdge(0,1,1,true);
             g.insertEdge(0,5,1,true);
             g.insertEdge(5,2,1,true);
             g.insertEdge(2,3,1,true);
             g.insertEdge(5,4,1,true);
+            */
             //g.insertEdge(4,0,1,true);
+
+            g.insertEdge(1,0,1,true);
+            g.insertEdge(0,2,1,true);
+            g.insertEdge(2,1,1,true);
+            g.insertEdge(0,3,1,true);
+            g.insertEdge(5,3,1,true);
+            g.insertEdge(3,5,1,true);
+            g.insertEdge(3,4,1,true);
             return g;
         }
 
@@ -292,6 +301,31 @@
             processVertexLate(root);
         }
 
+        // Reverses the edges of the graph
+        // returns a new graph, keeping original graph intact.
+        public static Graph reverseEdges(Graph g){
+            if(g==null || g.getNumberOfVertices()<2)
+                return g;
+            Graph g1=new Graph(g.getNumberOfVertices());
+
+            // Adding Vertices
+            for (int i = 0; i < g.getNumberOfVertices(); i++) {
+                g1.insertVertex(g.getVertex(i));
+            }
+
+            // Adding edges
+            EdgeNode edge;
+            for (int i = 0; i < g.getNumberOfVertices(); i++) {
+                edge=g.getEdgeList(i);
+                // As we are reversing edges that means the graph is directed
+                while (edge!=null){
+                    g1.insertEdge(edge.y,i,edge.weight,true);
+                    edge=edge.next;
+                }
+            }
+            return g1;
+        }
+
         public static void main(String[] args) {
             Graph g=Graph.createDummyGraph();
 
@@ -299,9 +333,16 @@
 
             System.out.println("DFS:");
             boolean visited[]=new boolean[g.getNumberOfVertices()];
-            g.dfs(0,visited);
+            //g.dfs(0,visited);
 
 //            System.out.println("BFS:");
   //          g.bfs(4);
+
+            System.out.println("Original DAG");
+            Graph g1=Graph.createDummyDAG();
+            g1.printGraph();
+            System.out.println("Reversed DAG");
+            g1=g1.reverseEdges(g1);
+                    g1.printGraph();
         }
     }
