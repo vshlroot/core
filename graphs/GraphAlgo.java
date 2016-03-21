@@ -102,6 +102,7 @@ public class GraphAlgo {
             }
         }
         return result;
+
     }
 
     // running BFS
@@ -320,6 +321,55 @@ public class GraphAlgo {
         return false;
     }
 
+
+    // Uses DFS
+    // First runs DFS to get a stack, then pops every vertex and runs DFS based on that to get SCC of that vertex.
+    public ArrayList<ArrayList<Integer>> getStronglyConnectedComponents(Graph g){
+        if(g==null || g.getNumberOfVertices()<1){
+            return null;
+        }
+        boolean[] visited=new boolean[g.getNumberOfVertices()];
+        int parent[]=new int[g.getNumberOfVertices()];
+        for (int i = 0; i < parent.length; i++) {
+            parent[i]=-1;
+        }
+        Stack<Integer> s=new Stack<>();
+        //runDfsForTopologicalSort(g, root, visited, parent, s);
+        for (int i = 0; i < g.getNumberOfVertices(); i++) {
+            if(!visited[i]){
+                runDfsForTopologicalSort(g, i, visited, parent, s);
+            }
+        }
+        System.out.println(s);
+        // s contains the DFS now.
+        // We pop one vertex from the stack one by one, if it is not visited yet then we run the DFS.
+        ArrayList<Integer> connectedComponent;
+        ArrayList<ArrayList<Integer>> result=new ArrayList<>();
+        int currentRoot;
+        Stack<Integer> s1=new Stack<>();
+        boolean[] visited1=new boolean[g.getNumberOfVertices()];
+        int parent1[]=new int[g.getNumberOfVertices()];
+        for (int i = 0; i < parent1.length; i++) {
+            parent1[i]=-1;
+        }
+        Graph g1=Graph.reverseEdges(g);
+        g1.printGraph();
+        while ((!s.isEmpty())){
+            connectedComponent=new ArrayList<>();
+            currentRoot=s.pop();
+            //System.out.println(currentRoot);
+            if(!visited1[currentRoot]){
+                runDfsForTopologicalSort(g1, currentRoot, visited1, parent1, s1);
+                //System.out.println(s);
+                while ((!s1.isEmpty())){
+                    connectedComponent.add(s1.pop());
+                }
+                result.add(connectedComponent);
+            }
+        }
+        return result;
+    }
+
     public static void main(String[] args) {
         Graph g=Graph.createDummyGraph();
         GraphAlgo algo=new GraphAlgo();
@@ -346,5 +396,9 @@ public class GraphAlgo {
         System.out.println("===========================");
         System.out.println("Topological Sort");
         System.out.println(algo.topologicalSort(dag,5));
+
+        System.out.println("===========================");
+        System.out.println("getStronglyConnectedComponents");
+        System.out.println(algo.getStronglyConnectedComponents(dag));
     }
 }
