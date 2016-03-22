@@ -241,7 +241,7 @@
 
             g.insertEdge(0,1,1,true);
             g.insertEdge(0,2,3,true);
-            g.insertEdge(0,4,100,true);
+            g.insertEdge(0,3,100,true);
             g.insertEdge(2,4,10,true);
             g.insertEdge(3,5,2,true);
             g.insertEdge(4,5,4,true);
@@ -256,6 +256,22 @@
                 nextEdge=edges[i];
                 while(nextEdge!=null){
                     System.out.print(vertices[nextEdge.y]+"-->");
+                    nextEdge=nextEdge.next;
+                }
+                System.out.print("X");
+                System.out.println();
+            }
+        }
+
+        public void printWeightedGraph(){
+            EdgeNode nextEdge;
+            for (int i = 0; i < numberOfVertices; i++) {
+                //System.out.print(degree[i]+"    "+vertices[i]+"--(");
+                System.out.print(degree[i]+"    "+vertices[i]+" ==(");
+                nextEdge=edges[i];
+                while(nextEdge!=null){
+                    //System.out.print(nextEdge.weight+")-->"+vertices[nextEdge.y]+"--(");
+                    System.out.print(nextEdge.weight+")==> "+vertices[nextEdge.y]+" ==(");
                     nextEdge=nextEdge.next;
                 }
                 System.out.print("X");
