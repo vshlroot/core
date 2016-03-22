@@ -209,6 +209,45 @@
             return g;
         }
 
+        public static Graph createDummyWightedGraph(){
+            Graph g=new Graph(7);
+            g.insertVertex(0);
+            g.insertVertex(1);
+            g.insertVertex(2);
+            g.insertVertex(3);
+            g.insertVertex(4);
+            g.insertVertex(5);
+            g.insertVertex(6);
+
+
+            System.out.println("Inserting edges");
+/*
+            g.insertEdge(0,1,1,false);
+            g.insertEdge(0,2,1,false);
+            //g.insertEdge(1,2,1,false);
+            g.insertEdge(1,3,1,false);
+            g.insertEdge(2,4,1,false);
+            g.insertEdge(2,5,1,false);
+            g.insertEdge(3,5,1,false);
+
+
+            g.insertEdge(0,1,1,true);
+            g.insertEdge(0,5,1,true);
+            g.insertEdge(5,2,1,true);
+            g.insertEdge(2,3,1,true);
+            g.insertEdge(5,4,1,true);
+            */
+            //g.insertEdge(4,0,1,true);
+
+            g.insertEdge(0,1,1,true);
+            g.insertEdge(0,2,3,true);
+            g.insertEdge(0,4,100,true);
+            g.insertEdge(2,4,10,true);
+            g.insertEdge(3,5,2,true);
+            g.insertEdge(4,5,4,true);
+            g.insertEdge(5,6,5,true);
+            return g;
+        }
 
         public void printGraph(){
             EdgeNode nextEdge;
