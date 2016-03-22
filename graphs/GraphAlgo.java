@@ -1,5 +1,7 @@
 package graphs;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -370,6 +372,71 @@ public class GraphAlgo {
         return result;
     }
 
+    // Runs prim's algo in O(V^2)
+    public Graph primsAlgo(Graph g, int root){
+        if(g== null || g.getNumberOfVertices()<1){
+            return null;
+        }
+        boolean inTree[]=new boolean[g.getNumberOfVertices()];
+        int distance[]=new int[g.getNumberOfVertices()];
+        int parent[]=new int[g.getNumberOfVertices()];
+
+        for (int i = 0; i < g.getNumberOfVertices(); i++) {
+            parent[i]=-1;
+            distance[i]=Integer.MAX_VALUE;
+            inTree[i]=false;
+        }
+
+        // Variables set.
+        // Starting from the root.
+
+        EdgeNode edge;
+        int i;
+        int minDistance;
+        int currentDistance=0;
+        while (!inTree[root]){
+            inTree[root]=true;
+            edge=g.getEdgeList(root);
+            while (edge!=null){
+                if(!inTree[edge.y] && distance[edge.y]>edge.weight){
+                    parent[edge.y]=root;
+                    distance[edge.y]=edge.weight;
+                }
+                edge=edge.next;
+            }
+
+            // Let's choose the vertex with minimum distance
+            minDistance=Integer.MAX_VALUE;
+            for (i = 0; i < g.getNumberOfVertices(); i++) {
+                if(!inTree[i] && distance[i]<minDistance){
+                    minDistance=distance[i];
+                    root=i;
+                }
+            }
+        }
+
+        return createTreeFromParentArray(g,parent,distance);
+    }
+
+    public Graph createTreeFromParentArray(Graph g,int[] parent, int[] distance){
+        if(parent==null || parent.length==0){
+            return null;
+        }
+        Graph g1 =new Graph(parent.length);
+
+        // Adding Vertices to graph
+        for (int i = 0; i < g.getNumberOfVertices(); i++) {
+            g1.insertVertex(g.getVertex(i));
+        }
+
+        for (int i = 0; i < g.getNumberOfVertices(); i++) {
+            if(parent[i]!=-1) {
+                g1.insertEdge(parent[i],i,distance[i],true);
+            }
+        }
+        return g1;
+    }
+
     public static void main(String[] args) {
         Graph g=Graph.createDummyGraph();
         GraphAlgo algo=new GraphAlgo();
@@ -400,5 +467,13 @@ public class GraphAlgo {
         System.out.println("===========================");
         System.out.println("getStronglyConnectedComponents");
         System.out.println(algo.getStronglyConnectedComponents(dag));
+
+        Graph weightedGraph=Graph.createDummyWightedGraph();
+        System.out.println("===========================");
+        System.out.println("getStronglyConnectedComponents");
+        weightedGraph.printWeightedGraph();
+        Graph spanningTree=algo.primsAlgo(weightedGraph,0);
+        System.out.println("After");
+        spanningTree.printWeightedGraph();
     }
 }
