@@ -211,13 +211,10 @@
 
         public static Graph createDummyWightedGraph(){
             Graph g=new Graph(7);
-            g.insertVertex(0);
-            g.insertVertex(1);
-            g.insertVertex(2);
-            g.insertVertex(3);
-            g.insertVertex(4);
-            g.insertVertex(5);
-            g.insertVertex(6);
+            int numberOfVertices=7;
+            for (int i = 0; i < numberOfVertices; i++) {
+                g.insertVertex(new VertexNode(i,Integer.MAX_VALUE,i));
+            }
 
 
             System.out.println("Inserting edges");
