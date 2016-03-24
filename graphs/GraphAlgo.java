@@ -1,11 +1,6 @@
 package graphs;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * Created by vishalss on 3/13/2016.
@@ -372,7 +367,8 @@ public class GraphAlgo {
         return result;
     }
 
-    // Runs prim's algo in O(V^2)
+    // Runs prim's algo in O(V^2 + E), see point 4 for the justification.
+    // can be improved using binary heaps.
     public Graph primsAlgo(Graph g, int root){
         if(g== null || g.getNumberOfVertices()<1){
             return null;
@@ -395,8 +391,12 @@ public class GraphAlgo {
         int minDistance;
         int currentDistance=0;
         while (!inTree[root]){
+            System.out.println(root);
             inTree[root]=true;
             edge=g.getEdgeList(root);
+            //point 4
+            // Here it's not V*E as not every vertex has all the edges attached to it.
+            // In any scenario, it will be E.
             while (edge!=null){
                 if(!inTree[edge.y] && distance[edge.y]>edge.weight){
                     parent[edge.y]=root;
@@ -418,6 +418,71 @@ public class GraphAlgo {
         return createTreeFromParentArray(g,parent,distance);
     }
 
+    // Everything will be same except we will be using heaps to fetch the next vertex to add
+    // Complexity:
+    public Graph primsAlgoUsingHeap(Graph g, int root) {
+        if (g == null || g.getNumberOfVertices() < 1) {
+            return null;
+        }
+        boolean inTree[]=new boolean[g.getNumberOfVertices()];
+        boolean inHeap[]=new boolean[g.getNumberOfVertices()];
+        int parent[]=new int[g.getNumberOfVertices()];
+
+        for (int i = 0; i < parent.length; i++) {
+            parent[i]=-1;
+            ((VertexNode)g.getVertex(i)).setDistance(Integer.MAX_VALUE);
+        }
+
+        PriorityQueue<VertexNode> heap=new PriorityQueue<>(g.getNumberOfVertices());
+
+        //heap.add(g.getVertex(root));
+        EdgeNode edge;
+        while(!inTree[root]){
+            System.out.println("root= "+root);
+            inTree[root]=true;
+            // Adding every adjacent vertex to heap with updated distance of the vertex.
+            edge=g.getEdgeList(root);
+            while(edge!=null){
+                if(!inTree[edge.y] && ((VertexNode)g.getVertex(edge.y)).getDistance()>edge.weight){
+                    if(inHeap[edge.y]){
+                        heap.remove((VertexNode)g.getVertex(edge.y));
+                    }
+                    ((VertexNode)g.getVertex(edge.y)).setDistance(edge.weight);
+                    parent[edge.y]=root;
+                    heap.add(((VertexNode)g.getVertex(edge.y)));
+                    inHeap[edge.y]=true;
+                }
+                edge=edge.next;
+            }
+            if(heap.isEmpty())
+                break;
+            root=heap.poll().getVertex();
+        }
+        return createTreeFromParentArray(g,parent);
+    }
+
+
+    // Here distance will be picked from the Vertex node.
+    public Graph createTreeFromParentArray(Graph g,int[] parent){
+        if(parent==null || parent.length==0){
+            return null;
+        }
+        Graph g1 =new Graph(parent.length);
+
+        // Adding Vertices to graph
+        for (int i = 0; i < g.getNumberOfVertices(); i++) {
+            g1.insertVertex(g.getVertex(i));
+        }
+
+        for (int i = 0; i < g.getNumberOfVertices(); i++) {
+            if(parent[i]!=-1) {
+                g1.insertEdge(parent[i],i,((VertexNode)g.getVertex(i)).getDistance(),true);
+            }
+        }
+        return g1;
+    }
+
+    // Will use the distance array that is passed separately.
     public Graph createTreeFromParentArray(Graph g,int[] parent, int[] distance){
         if(parent==null || parent.length==0){
             return null;
@@ -436,6 +501,9 @@ public class GraphAlgo {
         }
         return g1;
     }
+
+
+
 
     public static void main(String[] args) {
         Graph g=Graph.createDummyGraph();
@@ -470,10 +538,17 @@ public class GraphAlgo {
 
         Graph weightedGraph=Graph.createDummyWightedGraph();
         System.out.println("===========================");
-        System.out.println("getStronglyConnectedComponents");
+        System.out.println("primsAlgo");
         weightedGraph.printWeightedGraph();
         Graph spanningTree=algo.primsAlgo(weightedGraph,0);
         System.out.println("After");
         spanningTree.printWeightedGraph();
+
+        System.out.println("===========================");
+        System.out.println("primsAlgoUsingHeap");
+        weightedGraph.printWeightedGraph();
+        Graph spanningTree1=algo.primsAlgoUsingHeap(weightedGraph, 0);
+        System.out.println("After");
+        spanningTree1.printWeightedGraph();
     }
 }
