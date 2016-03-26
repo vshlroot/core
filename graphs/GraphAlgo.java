@@ -502,7 +502,31 @@ public class GraphAlgo {
         return g1;
     }
 
-
+    // Uses UnionFind data structure to run the algo.
+    public Graph kruskalAlgo(Graph g){
+        if(g== null || g.getNumberOfVertices()<1){
+            return null;
+        }
+        UnionFind set=new UnionFind(g.getNumberOfVertices());
+        //System.out.println(set);
+        EdgePair edgePairs[]=g.getEdgePairs();
+        Arrays.sort(edgePairs);
+        Graph mst=new Graph(g.getNumberOfVertices());
+        for (int i = 0; i < g.getNumberOfVertices(); i++) {
+            mst.insertVertex(g.getVertex(i));
+        }
+        for (int i = 0; i < edgePairs.length; i++) {
+            //System.out.println("Considering= "+edgePairs[i].i+" AND "+edgePairs[i].j);
+            //System.out.println("    component= "+set.find(edgePairs[i].i)+" and "+ set.find(edgePairs[i].j));
+            //System.out.println("        Same component ="+set.sameComponent(edgePairs[i].i,edgePairs[i].j));
+            if(!set.sameComponent(edgePairs[i].i,edgePairs[i].j)){
+                mst.insertEdge(edgePairs[i].i,edgePairs[i].j,edgePairs[i].weight,true);
+                set.unionSets(edgePairs[i].i,edgePairs[i].j);
+                //System.out.println("    After Union component= "+set.find(edgePairs[i].i)+" and "+ set.find(edgePairs[i].j));
+            }
+        }
+        return mst;
+    }
 
 
     public static void main(String[] args) {
@@ -536,7 +560,7 @@ public class GraphAlgo {
         System.out.println("getStronglyConnectedComponents");
         System.out.println(algo.getStronglyConnectedComponents(dag));
 
-        Graph weightedGraph=Graph.createDummyWightedGraph();
+        Graph weightedGraph=Graph.createDummyWeightedGraph();
         System.out.println("===========================");
         System.out.println("primsAlgo");
         weightedGraph.printWeightedGraph();
@@ -550,5 +574,12 @@ public class GraphAlgo {
         Graph spanningTree1=algo.primsAlgoUsingHeap(weightedGraph, 0);
         System.out.println("After");
         spanningTree1.printWeightedGraph();
+
+        System.out.println("===========================");
+        System.out.println("kruskalAlgo");
+        weightedGraph.printWeightedGraph();
+        Graph spanningTree2=algo.kruskalAlgo(weightedGraph);
+        System.out.println("After");
+        spanningTree2.printWeightedGraph();
     }
 }
