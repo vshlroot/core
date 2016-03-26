@@ -1,5 +1,9 @@
     package graphs;
 
+    import com.sun.javafx.geom.Edge;
+
+    import java.lang.reflect.Array;
+    import java.util.Arrays;
     import java.util.LinkedList;
     import java.util.Queue;
     import java.util.Stack;
@@ -209,7 +213,8 @@
             return g;
         }
 
-        public static Graph createDummyWightedGraph(){
+        // Creates weighted undirected graph
+        public static Graph createDummyWeightedGraph(){
             Graph g=new Graph(7);
             int numberOfVertices=7;
             for (int i = 0; i < numberOfVertices; i++) {
@@ -236,13 +241,13 @@
             */
             //g.insertEdge(4,0,1,true);
 
-            g.insertEdge(0,1,1,true);
-            g.insertEdge(0,2,3,true);
-            g.insertEdge(0,3,100,true);
-            g.insertEdge(2,4,10,true);
-            g.insertEdge(3,5,2,true);
-            g.insertEdge(4,5,4,true);
-            g.insertEdge(5,6,5,true);
+            g.insertEdge(0,1,1,false);
+            g.insertEdge(0,2,3,false);
+            g.insertEdge(0,3,100,false);
+            g.insertEdge(2,4,10,false);
+            g.insertEdge(3,5,2,false);
+            g.insertEdge(4,5,4,false);
+            g.insertEdge(5,6,5,false);
             return g;
         }
 
@@ -378,6 +383,30 @@
             return g1;
         }
 
+        // Returns unsorted edgePairs for a undirected graph
+        public EdgePair[] getEdgePairs(){
+            EdgePair edges[]=new EdgePair[numberOfEdges];
+            //System.out.println("numberOfEdges= "+ numberOfEdges);
+            for (int i = 0,k=0; i < numberOfVertices; i++) {
+                EdgeNode edge=getEdgeList(i);
+                while (edge!=null) {
+                    //System.out.println("k= "+k);
+                    //System.out.println("    "+i+"-"+edge.y);
+
+                    // Added following condition in order to remove duplicay of the edges.
+                    // Was feasible only because of the way Graph class is implemented.
+                    // May require changes if the Graph class is changed.
+                    if(i<edge.y) { //Ignoring the case for self loop
+                        //System.out.println("        Yes");
+                        edges[k] = new EdgePair(i, edge.y, edge.weight);
+                        k++;
+                    }
+                    edge=edge.next;
+                }
+            }
+            return edges;
+        }
+
         public static void main(String[] args) {
             Graph g=Graph.createDummyGraph();
 
@@ -395,6 +424,19 @@
             g1.printGraph();
             System.out.println("Reversed DAG");
             g1=g1.reverseEdges(g1);
-                    g1.printGraph();
+            g1.printGraph();
+
+            Graph weightedGraph=Graph.createDummyWeightedGraph();
+            weightedGraph.printGraph();
+            EdgePair edges[]=weightedGraph.getEdgePairs();
+            System.out.println(edges.length);
+            for (int i = 0; i < edges.length; i++) {
+                System.out.println(edges[i]);
+            }
+            Arrays.sort(edges);
+            System.out.println("\nAfter Sort:");
+            for (int i = 0; i < edges.length; i++) {
+                System.out.println(edges[i]);
+            }
         }
     }
