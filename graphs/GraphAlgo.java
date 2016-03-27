@@ -438,7 +438,7 @@ public class GraphAlgo {
         //heap.add(g.getVertex(root));
         EdgeNode edge;
         while(!inTree[root]){
-            System.out.println("root= "+root);
+            //System.out.println("root= "+root);
             inTree[root]=true;
             // Adding every adjacent vertex to heap with updated distance of the vertex.
             edge=g.getEdgeList(root);
@@ -528,6 +528,47 @@ public class GraphAlgo {
         return mst;
     }
 
+    // Uses Heap for finding the next edge to be included.
+    // Similar to Prims algo just that Prims is local where as Dijkstra's is global, keeping track of the accummulated distance so far.
+    // Prim's care only about the distnace of the next edge to be added.
+    public Graph dijkstrasAlgo(Graph g, int root){
+        if(g== null || g.getNumberOfVertices()<1){
+            return null;
+        }
+        boolean inTree[]=new boolean[g.getNumberOfVertices()];
+        int[] parent=new int[g.getNumberOfVertices()];
+        boolean[] inHeap=new boolean[g.getNumberOfVertices()];
+        PriorityQueue<VertexNode> heap=new PriorityQueue<>(g.getNumberOfVertices());
+
+        for (int i = 0; i < g.getNumberOfVertices(); i++) {
+            parent[i]=-1;
+            ((VertexNode)g.getVertex(i)).setDistance(Integer.MAX_VALUE);
+        }
+
+        EdgeNode edge;
+        inHeap[root]=true;
+        ((VertexNode)g.getVertex(root)).setDistance(0);
+        while (!inTree[root]){
+            inTree[root]=true;
+            edge=g.getEdgeList(root);
+            while (edge!=null){
+                if(!inTree[edge.y] && ((VertexNode)g.getVertex(edge.y)).getDistance()>(edge.weight+((VertexNode)g.getVertex(root)).getDistance())){
+                    parent[edge.y]=root;
+                    if(inHeap[edge.y]){
+                        heap.remove((VertexNode)g.getVertex(edge.y));
+                    }
+                    ((VertexNode)g.getVertex(edge.y)).setDistance(edge.weight+((VertexNode)g.getVertex(root)).getDistance());
+                    heap.add((VertexNode)g.getVertex(edge.y));
+                    inHeap[edge.y]=true;
+                }
+                edge=edge.next;
+            }
+            if (heap.isEmpty())
+                break;
+            root=heap.poll().getVertex();
+        }
+return createTreeFromParentArray(g,parent);
+    }
 
     public static void main(String[] args) {
         Graph g=Graph.createDummyGraph();
@@ -581,5 +622,14 @@ public class GraphAlgo {
         Graph spanningTree2=algo.kruskalAlgo(weightedGraph);
         System.out.println("After");
         spanningTree2.printWeightedGraph();
+
+        System.out.println("===========================");
+        System.out.println("dijkstrasAlgo");
+        weightedGraph.printWeightedGraph();
+        Graph spanningTree3=algo.dijkstrasAlgo(weightedGraph, 0);
+        System.out.println("After");
+        spanningTree3.printWeightedGraph();
+
+
     }
 }
