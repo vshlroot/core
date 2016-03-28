@@ -109,6 +109,182 @@
             degree[numberOfVertices]=0;
         }
 
+        public void printGraph(){
+            EdgeNode nextEdge;
+            for (int i = 0; i < numberOfVertices; i++) {
+                System.out.print(degree[i]+"    "+vertices[i]+"-->");
+                nextEdge=edges[i];
+                while(nextEdge!=null){
+                    System.out.print(vertices[nextEdge.y]+"-->");
+                    nextEdge=nextEdge.next;
+                }
+                System.out.print("X");
+                System.out.println();
+            }
+        }
+
+        public void printWeightedGraph(){
+            EdgeNode nextEdge;
+            for (int i = 0; i < numberOfVertices; i++) {
+                //System.out.print(degree[i]+"    "+vertices[i]+"--(");
+                System.out.print(degree[i]+"    "+vertices[i]+" ==(");
+                nextEdge=edges[i];
+                while(nextEdge!=null){
+                    //System.out.print(nextEdge.weight+")-->"+vertices[nextEdge.y]+"--(");
+                    System.out.print(nextEdge.weight+")==> "+vertices[nextEdge.y]+" ==(");
+                    nextEdge=nextEdge.next;
+                }
+                System.out.print("X");
+                System.out.println();
+            }
+        }
+
+        // Runs BFS on graph, uses Queue
+        // Edit processVertexEarly, processVertexLate and processEdge to modify the processing order
+        public void bfs(int root){
+            if(root<0){
+                System.out.println("Invalid root");
+                return;
+            }
+            if(numberOfVertices<=0){
+                return;
+            }
+            boolean visited[]=new boolean[numberOfVertices];
+            boolean processed[]=new boolean[numberOfVertices];
+
+            for (int i = 0; i < visited.length; i++) {
+                visited[i]=false;
+                processed[i]=false;
+            }
+            Queue<Integer> q=new LinkedList<>();
+            q.add(root);
+            visited[root]=true;
+            int currentIndex;
+            EdgeNode edge;
+            while(!q.isEmpty()){
+                currentIndex=q.remove();
+                processVertexEarly(currentIndex);
+                processed[currentIndex]=true;
+                edge=edges[currentIndex];
+                while(edge!=null){
+                    if(!visited[edge.y]) {
+                        visited[edge.y]=true;
+                        processEdge(currentIndex,edge.y);
+                        q.add(edge.y);
+                    }
+                    edge = edge.next;
+                }
+                processVertexLate(currentIndex);
+            }
+        }
+
+        public void processVertexEarly(int index){
+            System.out.println(vertices[index]);
+        }
+
+        public void processVertexLate(int index){
+            //System.out.println(vertices[index]);
+        }
+
+        public void processEdge(int x,int y){
+            //System.out.println(vertices[index]);
+        }
+
+        // Runs DFS on graph, uses recursion
+        // Edit processVertexEarly, processVertexLate and processEdge to modify the processing order
+        // For now I don't think iterative way of running DFS is there...We'll see...
+        public void dfs(int root,boolean[] visited){
+            if(root<0){
+                System.out.println("Invalid root");
+                return;
+            }
+            if(numberOfVertices<=0){
+                return;
+            }
+            visited[root]=true;
+            EdgeNode edge;
+            processVertexEarly(root);
+            edge=edges[root];
+            while(edge!=null){
+                if(!visited[edge.y]) {
+                    visited[edge.y]=true;
+                    processEdge(root,edge.y);
+                    dfs(edge.y,visited);
+                }
+                edge = edge.next;
+            }
+            processVertexLate(root);
+        }
+
+        // Reverses the edges of the graph
+        // returns a new graph, keeping original graph intact.
+        public static Graph reverseEdges(Graph g){
+            if(g==null || g.getNumberOfVertices()<2)
+                return g;
+            Graph g1=new Graph(g.getNumberOfVertices());
+
+            // Adding Vertices
+            for (int i = 0; i < g.getNumberOfVertices(); i++) {
+                g1.insertVertex(g.getVertex(i));
+            }
+
+            // Adding edges
+            EdgeNode edge;
+            for (int i = 0; i < g.getNumberOfVertices(); i++) {
+                edge=g.getEdgeList(i);
+                // As we are reversing edges that means the graph is directed
+                while (edge!=null){
+                    g1.insertEdge(edge.y,i,edge.weight,true);
+                    edge=edge.next;
+                }
+            }
+            return g1;
+        }
+
+        // Returns the adjacency matrix form of the e graph.
+        public int[][] getAdjacencyMatrix(){
+            int[][] adjacencyMatrix=new int[numberOfVertices][numberOfVertices];
+
+            for (int i = 0; i < adjacencyMatrix.length; i++) {
+                for (int j = 0; j < adjacencyMatrix.length; j++) {
+                    adjacencyMatrix[i][j]=Integer.MAX_VALUE;
+                }
+            }
+            EdgeNode edge;
+            for (int i = 0; i < numberOfVertices; i++) {
+                edge= getEdgeList(i);
+                while (edge!=null){
+                    adjacencyMatrix[i][edge.y]=edge.weight;
+                    edge=edge.next;
+                }
+            }
+            return adjacencyMatrix;
+        }
+
+        // Returns unsorted edgePairs for a undirected graph
+        public EdgePair[] getEdgePairs(){
+            EdgePair edges[]=new EdgePair[numberOfEdges];
+            //System.out.println("numberOfEdges= "+ numberOfEdges);
+            for (int i = 0,k=0; i < numberOfVertices; i++) {
+                EdgeNode edge=getEdgeList(i);
+                while (edge!=null) {
+                    //System.out.println("k= "+k);
+                    //System.out.println("    "+i+"-"+edge.y);
+
+                    // Added following condition in order to remove duplicay of the edges.
+                    // Was feasible only because of the way Graph class is implemented.
+                    // May require changes if the Graph class is changed.
+                    if(i<edge.y) { //Ignoring the case for self loop
+                        //System.out.println("        Yes");
+                        edges[k] = new EdgePair(i, edge.y, edge.weight);
+                        k++;
+                    }
+                    edge=edge.next;
+                }
+            }
+            return edges;
+        }
+
         // Will create graph of MAXV=6 with one connected component.
         public static Graph createDummyGraph(){
             Graph g=new Graph(6);
@@ -249,162 +425,6 @@
             g.insertEdge(4,5,4,false);
             g.insertEdge(5,6,5,false);
             return g;
-        }
-
-        public void printGraph(){
-            EdgeNode nextEdge;
-            for (int i = 0; i < numberOfVertices; i++) {
-                System.out.print(degree[i]+"    "+vertices[i]+"-->");
-                nextEdge=edges[i];
-                while(nextEdge!=null){
-                    System.out.print(vertices[nextEdge.y]+"-->");
-                    nextEdge=nextEdge.next;
-                }
-                System.out.print("X");
-                System.out.println();
-            }
-        }
-
-        public void printWeightedGraph(){
-            EdgeNode nextEdge;
-            for (int i = 0; i < numberOfVertices; i++) {
-                //System.out.print(degree[i]+"    "+vertices[i]+"--(");
-                System.out.print(degree[i]+"    "+vertices[i]+" ==(");
-                nextEdge=edges[i];
-                while(nextEdge!=null){
-                    //System.out.print(nextEdge.weight+")-->"+vertices[nextEdge.y]+"--(");
-                    System.out.print(nextEdge.weight+")==> "+vertices[nextEdge.y]+" ==(");
-                    nextEdge=nextEdge.next;
-                }
-                System.out.print("X");
-                System.out.println();
-            }
-        }
-
-        // Runs BFS on graph, uses Queue
-        // Edit processVertexEarly, processVertexLate and processEdge to modify the processing order
-        public void bfs(int root){
-            if(root<0){
-                System.out.println("Invalid root");
-                return;
-            }
-            if(numberOfVertices<=0){
-                return;
-            }
-            boolean visited[]=new boolean[numberOfVertices];
-            boolean processed[]=new boolean[numberOfVertices];
-
-            for (int i = 0; i < visited.length; i++) {
-                visited[i]=false;
-                processed[i]=false;
-            }
-            Queue<Integer> q=new LinkedList<>();
-            q.add(root);
-            visited[root]=true;
-            int currentIndex;
-            EdgeNode edge;
-            while(!q.isEmpty()){
-                currentIndex=q.remove();
-                processVertexEarly(currentIndex);
-                processed[currentIndex]=true;
-                edge=edges[currentIndex];
-                while(edge!=null){
-                    if(!visited[edge.y]) {
-                        visited[edge.y]=true;
-                        processEdge(currentIndex,edge.y);
-                        q.add(edge.y);
-                    }
-                    edge = edge.next;
-                }
-                processVertexLate(currentIndex);
-            }
-        }
-
-        public void processVertexEarly(int index){
-            System.out.println(vertices[index]);
-        }
-
-        public void processVertexLate(int index){
-            //System.out.println(vertices[index]);
-        }
-
-        public void processEdge(int x,int y){
-            //System.out.println(vertices[index]);
-        }
-
-        // Runs DFS on graph, uses recursion
-        // Edit processVertexEarly, processVertexLate and processEdge to modify the processing order
-        // For now I don't think iterative way of running DFS is there...We'll see...
-        public void dfs(int root,boolean[] visited){
-            if(root<0){
-                System.out.println("Invalid root");
-                return;
-            }
-            if(numberOfVertices<=0){
-                return;
-            }
-            visited[root]=true;
-            EdgeNode edge;
-            processVertexEarly(root);
-            edge=edges[root];
-            while(edge!=null){
-                if(!visited[edge.y]) {
-                    visited[edge.y]=true;
-                    processEdge(root,edge.y);
-                    dfs(edge.y,visited);
-                }
-                edge = edge.next;
-            }
-            processVertexLate(root);
-        }
-
-        // Reverses the edges of the graph
-        // returns a new graph, keeping original graph intact.
-        public static Graph reverseEdges(Graph g){
-            if(g==null || g.getNumberOfVertices()<2)
-                return g;
-            Graph g1=new Graph(g.getNumberOfVertices());
-
-            // Adding Vertices
-            for (int i = 0; i < g.getNumberOfVertices(); i++) {
-                g1.insertVertex(g.getVertex(i));
-            }
-
-            // Adding edges
-            EdgeNode edge;
-            for (int i = 0; i < g.getNumberOfVertices(); i++) {
-                edge=g.getEdgeList(i);
-                // As we are reversing edges that means the graph is directed
-                while (edge!=null){
-                    g1.insertEdge(edge.y,i,edge.weight,true);
-                    edge=edge.next;
-                }
-            }
-            return g1;
-        }
-
-        // Returns unsorted edgePairs for a undirected graph
-        public EdgePair[] getEdgePairs(){
-            EdgePair edges[]=new EdgePair[numberOfEdges];
-            //System.out.println("numberOfEdges= "+ numberOfEdges);
-            for (int i = 0,k=0; i < numberOfVertices; i++) {
-                EdgeNode edge=getEdgeList(i);
-                while (edge!=null) {
-                    //System.out.println("k= "+k);
-                    //System.out.println("    "+i+"-"+edge.y);
-
-                    // Added following condition in order to remove duplicay of the edges.
-                    // Was feasible only because of the way Graph class is implemented.
-                    // May require changes if the Graph class is changed.
-                    if(i<edge.y) { //Ignoring the case for self loop
-                        //System.out.println("        Yes");
-                        edges[k] = new EdgePair(i, edge.y, edge.weight);
-                        k++;
-                    }
-                    edge=edge.next;
-                }
-            }
-            return edges;
         }
 
         public static void main(String[] args) {
