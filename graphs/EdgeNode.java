@@ -15,6 +15,11 @@ public class EdgeNode {
     int y;          // Pointer of this node. In adjacency list this will point to the index of the Vertex
     int weight;     // Weight of this edge
 
+    // following fields for Max flow algo.
+    int capacity;       // Capacity of the edge.
+    int currentFlow;    // Current flow through the edge.
+    int residualFlow;   // Left over flow in the edge.
+
     EdgeNode(){
     }
 
@@ -23,8 +28,15 @@ public class EdgeNode {
     }
 
     EdgeNode(int y,int weight,EdgeNode next){
+        this(y,weight,next, 0);
+    }
+
+    EdgeNode(int y,int weight,EdgeNode next, int capacity){
         this.y=y;
         this.weight=weight;
         this.next=next;
+        this.capacity=capacity;
+        this.residualFlow=capacity;
+        this.currentFlow=0;
     }
 }
