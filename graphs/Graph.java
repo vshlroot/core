@@ -1,685 +1,465 @@
-package graphs;
+    package graphs;
 
-import java.util.*;
+    import com.sun.javafx.geom.Edge;
 
-/**
- * Created by vishalss on 3/13/2016.
- */
+    import java.lang.reflect.Array;
+    import java.util.Arrays;
+    import java.util.LinkedList;
+    import java.util.Queue;
+    import java.util.Stack;
+
+    /**
+     * Created by vishalss on 3/12/2016.
+     */
+    public class Graph {
+
+        private final int MAXV;         // Max number of vertices allowed
+        private int numberOfVertices;   // Current number of vertices
+        private int numberOfEdges;      // Current number of edges
+        private Object vertices[];      // Holds the node data
+        private EdgeNode edges[];       // Holds the pointers to the edges of vertex i
+        private int degree[];           // degree of vertex i;
+
+        Graph(){
+            this(0);
+        }
+
+        Graph(int MAXV){
+            this.MAXV=MAXV;
+            vertices=new Object[MAXV];
+            edges=new EdgeNode[MAXV];
+            degree=new int[MAXV];
+            initializeGraph();
+        }
+
+        public void initializeGraph(){
+            numberOfEdges=0;
+            numberOfVertices=0;
+            for (int i = 0; i < MAXV; i++) {
+                degree[i]=0;
+                edges[i]=null;
+                vertices[i]=null;
+            }
+        }
+
+        public int getNumberOfVertices() {
+            return numberOfVertices;
+        }
+
+        public int getNumberOfEdges() {
+            return numberOfEdges;
+        }
+
+        public int getDegree(int index){
+            if(index>numberOfVertices){
+                System.out.println("Invalid index");
+                return -1;
+            }
+            return degree[index];
+        }
+
+        public EdgeNode getEdgeList(int index){
+            if(index>numberOfVertices){
+                System.out.println("Invalid index");
+                return null;
+            }
+            return edges[index];
+        }
+
+        public Object getVertex(int index){
+            if(index>numberOfVertices){
+                System.out.println("Invalid index");
+                return -1;
+            }
+            return vertices[index];
+        }
+
+        // Inserts a new edge in the graph
+        public void insertEdge(int x,int y, int weight, boolean directed){
+            EdgeNode newEdge=new EdgeNode(y,weight,edges[x]);
+            edges[x]=newEdge;
+            degree[x]++;
+            //System.out.println("NEW DEGREE= "+degree[x]);
+            if(!directed){
+                insertEdge(y,x,weight,true);        // passing true to break infinite loop.
+            }
+            else{
+                numberOfEdges++;
+            }
+        }
+
+        // Inserts a new vertex in the graph
+        public void insertVertex(Object data){
+            if(data==null){
+                System.out.println("Invalid input");
+                return;
+            }
+            if(numberOfVertices>=MAXV){
+                System.out.println("MAXV reached");
+                return;
+            }
+            initializeVertex(data);
+            numberOfVertices++;
+            //System.out.println("numberOfVertices"+numberOfVertices);
+        }
+
+        public void initializeVertex(Object data){
+            vertices[numberOfVertices]=data;
+            edges[numberOfVertices]=null;
+            degree[numberOfVertices]=0;
+        }
+
+        public void printGraph(){
+            EdgeNode nextEdge;
+            for (int i = 0; i < numberOfVertices; i++) {
+                System.out.print(degree[i]+"    "+vertices[i]+"-->");
+                nextEdge=edges[i];
+                while(nextEdge!=null){
+                    System.out.print(vertices[nextEdge.y]+"-->");
+                    nextEdge=nextEdge.next;
+                }
+                System.out.print("X");
+                System.out.println();
+            }
+        }
+
+        public void printWeightedGraph(){
+            EdgeNode nextEdge;
+            for (int i = 0; i < numberOfVertices; i++) {
+                //System.out.print(degree[i]+"    "+vertices[i]+"--(");
+                System.out.print(degree[i]+"    "+vertices[i]+" ==(");
+                nextEdge=edges[i];
+                while(nextEdge!=null){
+                    //System.out.print(nextEdge.weight+")-->"+vertices[nextEdge.y]+"--(");
+                    System.out.print(nextEdge.weight+")==> "+vertices[nextEdge.y]+" ==(");
+                    nextEdge=nextEdge.next;
+                }
+                System.out.print("X");
+                System.out.println();
+            }
+        }
+
+        // Runs BFS on graph, uses Queue
+        // Edit processVertexEarly, processVertexLate and processEdge to modify the processing order
+        public void bfs(int root){
+            if(root<0){
+                System.out.println("Invalid root");
+                return;
+            }
+            if(numberOfVertices<=0){
+                return;
+            }
+            boolean visited[]=new boolean[numberOfVertices];
+            boolean processed[]=new boolean[numberOfVertices];
+
+            for (int i = 0; i < visited.length; i++) {
+                visited[i]=false;
+                processed[i]=false;
+            }
+            Queue<Integer> q=new LinkedList<>();
+            q.add(root);
+            visited[root]=true;
+            int currentIndex;
+            EdgeNode edge;
+            while(!q.isEmpty()){
+                currentIndex=q.remove();
+                processVertexEarly(currentIndex);
+                processed[currentIndex]=true;
+                edge=edges[currentIndex];
+                while(edge!=null){
+                    if(!visited[edge.y]) {
+                        visited[edge.y]=true;
+                        processEdge(currentIndex,edge.y);
+                        q.add(edge.y);
+                    }
+                    edge = edge.next;
+                }
+                processVertexLate(currentIndex);
+            }
+        }
+
+        public void processVertexEarly(int index){
+            System.out.println(vertices[index]);
+        }
+
+        public void processVertexLate(int index){
+            //System.out.println(vertices[index]);
+        }
+
+        public void processEdge(int x,int y){
+            //System.out.println(vertices[index]);
+        }
+
+        // Runs DFS on graph, uses recursion
+        // Edit processVertexEarly, processVertexLate and processEdge to modify the processing order
+        // For now I don't think iterative way of running DFS is there...We'll see...
+        public void dfs(int root,boolean[] visited){
+            if(root<0){
+                System.out.println("Invalid root");
+                return;
+            }
+            if(numberOfVertices<=0){
+                return;
+            }
+            visited[root]=true;
+            EdgeNode edge;
+            processVertexEarly(root);
+            edge=edges[root];
+            while(edge!=null){
+                if(!visited[edge.y]) {
+                    visited[edge.y]=true;
+                    processEdge(root,edge.y);
+                    dfs(edge.y,visited);
+                }
+                edge = edge.next;
+            }
+            processVertexLate(root);
+        }
+
+        // Reverses the edges of the graph
+        // returns a new graph, keeping original graph intact.
+        public static Graph reverseEdges(Graph g){
+            if(g==null || g.getNumberOfVertices()<2)
+                return g;
+            Graph g1=new Graph(g.getNumberOfVertices());
+
+            // Adding Vertices
+            for (int i = 0; i < g.getNumberOfVertices(); i++) {
+                g1.insertVertex(g.getVertex(i));
+            }
+
+            // Adding edges
+            EdgeNode edge;
+            for (int i = 0; i < g.getNumberOfVertices(); i++) {
+                edge=g.getEdgeList(i);
+                // As we are reversing edges that means the graph is directed
+                while (edge!=null){
+                    g1.insertEdge(edge.y,i,edge.weight,true);
+                    edge=edge.next;
+                }
+            }
+            return g1;
+        }
+
+        // Returns the adjacency matrix form of the e graph.
+        public int[][] getAdjacencyMatrix(){
+            int[][] adjacencyMatrix=new int[numberOfVertices][numberOfVertices];
+
+            for (int i = 0; i < adjacencyMatrix.length; i++) {
+                for (int j = 0; j < adjacencyMatrix.length; j++) {
+                    adjacencyMatrix[i][j]=Integer.MAX_VALUE;
+                }
+            }
+            for (int i = 0; i < adjacencyMatrix.length; i++) {
+                adjacencyMatrix[i][i]=0;
+            }
+            EdgeNode edge;
+            for (int i = 0; i < numberOfVertices; i++) {
+                edge= getEdgeList(i);
+                while (edge!=null){
+                    adjacencyMatrix[i][edge.y]=edge.weight;
+                    edge=edge.next;
+                }
+            }
+            return adjacencyMatrix;
+        }
+
+        // Returns unsorted edgePairs for a undirected graph
+        public EdgePair[] getEdgePairs(){
+            EdgePair edges[]=new EdgePair[numberOfEdges];
+            //System.out.println("numberOfEdges= "+ numberOfEdges);
+            for (int i = 0,k=0; i < numberOfVertices; i++) {
+                EdgeNode edge=getEdgeList(i);
+                while (edge!=null) {
+                    //System.out.println("k= "+k);
+                    //System.out.println("    "+i+"-"+edge.y);
+
+                    // Added following condition in order to remove duplicay of the edges.
+                    // Was feasible only because of the way Graph class is implemented.
+                    // May require changes if the Graph class is changed.
+                    if(i<edge.y) { //Ignoring the case for self loop
+                        //System.out.println("        Yes");
+                        edges[k] = new EdgePair(i, edge.y, edge.weight);
+                        k++;
+                    }
+                    edge=edge.next;
+                }
+            }
+            return edges;
+        }
+
+        // Will create graph of MAXV=6 with one connected component.
+        public static Graph createDummyGraph(){
+            Graph g=new Graph(6);
+            g.insertVertex(0);
+            g.insertVertex(1);
+            g.insertVertex(2);
+            g.insertVertex(3);
+            g.insertVertex(4);
+            g.insertVertex(5);
+
+
+            System.out.println("Inserting edges");
 /*
-Implements basic algorithms on graphs
-Shortest Path between two nodes
-  */
-public class GraphAlgo {
+            g.insertEdge(0,1,1,false);
+            g.insertEdge(0,2,1,false);
+            //g.insertEdge(1,2,1,false);
+            g.insertEdge(1,3,1,false);
+            g.insertEdge(2,4,1,false);
+            g.insertEdge(2,5,1,false);
+            g.insertEdge(3,5,1,false);
 
-    static private int time;
-    GraphAlgo(){
+            */
+            g.insertEdge(0,1,1,false);
+            g.insertEdge(1,2,1,false);
+            g.insertEdge(2,3,1,false);
+            g.insertEdge(3,4,1,false);
+            g.insertEdge(4,2,1,false);
+            g.insertEdge(5,0,1,false);
 
+            return g;
+        }
+
+
+        // Will create graph of MAXV=6 with 3 connected component.
+        public static Graph createDummyGraphUnconnected(){
+            Graph g=new Graph(11);
+            g.insertVertex(0);
+            g.insertVertex(1);
+            g.insertVertex(2);
+            g.insertVertex(3);
+            g.insertVertex(4);
+            g.insertVertex(5);
+            g.insertVertex(6);
+            g.insertVertex(7);
+            g.insertVertex(8);
+            g.insertVertex(9);
+            g.insertVertex(10);
+
+
+            System.out.println("Inserting edges");
+
+            g.insertEdge(0,1,1,false);
+            g.insertEdge(0,2,1,false);
+            g.insertEdge(1,2,1,false);
+            g.insertEdge(1,3,1,false);
+            g.insertEdge(2,4,1,false);
+            g.insertEdge(2,5,1,false);
+            g.insertEdge(6,7,1,false);
+            g.insertEdge(8,9,1,false);
+            g.insertEdge(9,10,1,false);
+
+            return g;
+        }
+
+        // Will create directed acyclic graph of MAXV=6 with one connected component.
+        public static Graph createDummyDAG(){
+            Graph g=new Graph(6);
+            g.insertVertex(0);
+            g.insertVertex(1);
+            g.insertVertex(2);
+            g.insertVertex(3);
+            g.insertVertex(4);
+            g.insertVertex(5);
+
+
+            System.out.println("Inserting edges");
+/*
+            g.insertEdge(0,1,1,false);
+            g.insertEdge(0,2,1,false);
+            //g.insertEdge(1,2,1,false);
+            g.insertEdge(1,3,1,false);
+            g.insertEdge(2,4,1,false);
+            g.insertEdge(2,5,1,false);
+            g.insertEdge(3,5,1,false);
+
+
+            g.insertEdge(0,1,1,true);
+            g.insertEdge(0,5,1,true);
+            g.insertEdge(5,2,1,true);
+            g.insertEdge(2,3,1,true);
+            g.insertEdge(5,4,1,true);
+            */
+            //g.insertEdge(4,0,1,true);
+
+            g.insertEdge(1,0,1,true);
+            g.insertEdge(0,2,1,true);
+            g.insertEdge(2,1,1,true);
+            g.insertEdge(0,3,1,true);
+            g.insertEdge(5,3,1,true);
+            g.insertEdge(3,5,1,true);
+            g.insertEdge(3,4,1,true);
+            return g;
+        }
+
+        // Creates weighted undirected graph
+        public static Graph createDummyWeightedGraph(){
+            Graph g=new Graph(7);
+            int numberOfVertices=7;
+            for (int i = 0; i < numberOfVertices; i++) {
+                g.insertVertex(new VertexNode(i,Integer.MAX_VALUE,i));
+            }
+
+
+            System.out.println("Inserting edges");
+/*
+            g.insertEdge(0,1,1,false);
+            g.insertEdge(0,2,1,false);
+            //g.insertEdge(1,2,1,false);
+            g.insertEdge(1,3,1,false);
+            g.insertEdge(2,4,1,false);
+            g.insertEdge(2,5,1,false);
+            g.insertEdge(3,5,1,false);
+
+
+            g.insertEdge(0,1,1,true);
+            g.insertEdge(0,5,1,true);
+            g.insertEdge(5,2,1,true);
+            g.insertEdge(2,3,1,true);
+            g.insertEdge(5,4,1,true);
+            */
+            //g.insertEdge(4,0,1,true);
+
+            g.insertEdge(0,1,1,false);
+            g.insertEdge(0,2,3,false);
+            g.insertEdge(0,3,100,false);
+            g.insertEdge(2,4,10,false);
+            g.insertEdge(3,5,2,false);
+            g.insertEdge(4,5,4,false);
+            g.insertEdge(5,6,5,false);
+            return g;
+        }
+
+        public static void main(String[] args) {
+            Graph g=Graph.createDummyGraph();
+
+            g.printGraph();
+
+            System.out.println("DFS:");
+            boolean visited[]=new boolean[g.getNumberOfVertices()];
+            //g.dfs(0,visited);
+
+//            System.out.println("BFS:");
+  //          g.bfs(4);
+
+            System.out.println("Original DAG");
+            Graph g1=Graph.createDummyDAG();
+            g1.printGraph();
+            System.out.println("Reversed DAG");
+            g1=g1.reverseEdges(g1);
+            g1.printGraph();
+
+            Graph weightedGraph=Graph.createDummyWeightedGraph();
+            weightedGraph.printGraph();
+            EdgePair edges[]=weightedGraph.getEdgePairs();
+            System.out.println(edges.length);
+            for (int i = 0; i < edges.length; i++) {
+                System.out.println(edges[i]);
+            }
+            Arrays.sort(edges);
+            System.out.println("\nAfter Sort:");
+            for (int i = 0; i < edges.length; i++) {
+                System.out.println(edges[i]);
+            }
+        }
     }
-
-    // Finds shortest path between vertex x and y (x and y are indexes)
-    // Uses BFS
-    public ArrayList<Integer> shortestPath(Graph g,int x, int y){
-        if(g==null || g.getNumberOfVertices()<=0){
-            System.out.println("Invalid input: Empty Graph");
-            return null;
-        }
-
-        // Running BFS
-        Queue<Integer> q=new LinkedList<>();
-        q.add(x);
-        boolean visited[]=new boolean[g.getNumberOfVertices()];
-        int parent[]=new int[g.getNumberOfVertices()];
-        for (int i = 0; i < g.getNumberOfVertices(); i++) {
-            visited[i]=false;
-            parent[i]=-1;
-        }
-        int currentVertex;
-        EdgeNode edge;
-        visited[x]=true;
-        while (!q.isEmpty()){
-            currentVertex=q.remove();
-            if(currentVertex==y){
-                break;
-            }
-            edge=g.getEdgeList(currentVertex);
-            while (edge!=null){
-                if(!visited[edge.y]){
-                    visited[edge.y]=true;
-                    parent[edge.y]=currentVertex;
-                    q.add(edge.y);
-                }
-                if (edge.y==y){
-                    break;
-                }
-                edge=edge.next;
-            }
-        }
-        //fetching the path
-        return printPath(parent,y);
-    }
-
-    // Provided a parent array prints the path from source node to a node.
-    public ArrayList<Integer> printPath(int[] parent, int vertex){
-        ArrayList<Integer> path =new ArrayList<>();
-        Stack<Integer> s= new Stack<>();
-        s.push(vertex);
-        while (parent[vertex]!=-1){
-            vertex=parent[vertex];
-            s.add(vertex);
-        }
-
-        while (!s.empty()){
-            path.add(s.pop());
-        }
-        return path;
-    }
-
-
-    public int numberOfConnectedComponents(Graph g){
-        ArrayList connectedComponents=getConnectedComponents(g);
-        return connectedComponents ==null?0: connectedComponents.size();
-    }
-
-    public ArrayList getConnectedComponents(Graph g){
-        if(g==null || g.getNumberOfVertices()==0){
-            return null;
-        }
-        ArrayList<ArrayList<Integer>> result=new ArrayList<>();
-
-        boolean visited[]=new boolean[g.getNumberOfVertices()];
-        for (int i = 0; i <visited.length ; i++) {
-            visited[i]=false;
-        }
-
-        ArrayList currentComponent;
-        for (int i = 0; i < visited.length; i++) {
-            if(visited[i]==false){
-                currentComponent=findConnectedComponentFrom(g,i,visited);
-                result.add(currentComponent);
-            }
-        }
-        return result;
-
-    }
-
-    // running BFS
-    public ArrayList<Integer> findConnectedComponentFrom(Graph g,int index,boolean[] visited ){
-        System.out.println("visited.length"+visited.length);
-        ArrayList<Integer> components=new ArrayList<>();
-        Queue<Integer> q=new LinkedList<>();
-        q.add(index);
-        visited[index]=true;
-
-        EdgeNode edge;
-        int currentVertex;
-        while (!q.isEmpty()) {
-            currentVertex=q.remove();
-            components.add(currentVertex);
-            edge=g.getEdgeList(currentVertex);
-            while (edge != null) {
-                if(!visited[edge.y]){
-                    visited[edge.y]=true;
-                    q.add(edge.y);
-                }
-                edge = edge.next;
-            }
-        }
-        return components;
-    }
-
-    // Will use BFS. Our exploration will radiate out rather than pierce.
-    // Will start from the root vertex.
-    // Will consider graph with single Connected component
-    // Future: Will work for more than one connected components
-    public boolean isGraphTwoColorable(Graph g){
-        if(g==null){
-            return false;
-        }
-        if(g.getNumberOfVertices()<2)
-            return true;
-
-        int color[]=new int[g.getNumberOfVertices()];
-        for (int i = 0; i < g.getNumberOfVertices(); i++) {
-
-            color[i]=-1;
-        }
-        Queue<Integer> q=new LinkedList<>();
-
-        EdgeNode edge;
-        int currentVertex;
-        q.add(0);
-        color[0]=0;
-        while(!q.isEmpty()){
-            currentVertex=q.remove();
-            edge=g.getEdgeList(currentVertex);
-            while(edge!=null){
-                if(color[edge.y]==-1) {
-                    color[edge.y] = 1-color[currentVertex]; // Neet trick, isn't it...
-                    q.add(edge.y);
-                }
-                else if(color[edge.y]==color[currentVertex]){
-                    System.out.println(currentVertex);
-                    System.out.println(edge.y);
-                    return false;
-                }
-                edge=edge.next;
-            }
-        }
-        return true;
-    }
-
-    // Checks for a cycle using DFS
-    // Starts from root 0
-    public boolean cycleExists(Graph g){
-        if(g==null || g.getNumberOfVertices()<=1){
-            return false;
-        }
-        boolean discovered[]=new boolean[g.getNumberOfVertices()];
-        int parent[]=new int[g.getNumberOfVertices()];
-
-        for (int i = 0; i < discovered.length; i++) {
-            discovered[i]=false;
-            parent[i]=-1;
-        }
-        Stack<Integer> s=new Stack<>();
-        s.push(0);
-        discovered[0]=true;
-        int currentVertex;
-        EdgeNode edge;
-        while (!s.isEmpty()){
-            currentVertex=s.pop();
-            discovered[currentVertex]=true;
-            edge=g.getEdgeList(currentVertex);
-            while (edge!=null){
-                if(discovered[edge.y] && edge.y!=parent[currentVertex]){
-                    System.out.println(currentVertex);
-                    System.out.println(edge.y);
-                    System.out.println(parent[currentVertex]);
-                    return true;
-                }
-                if(!discovered[edge.y]) {
-                    s.push(edge.y);
-                    discovered[edge.y] = true;
-                    parent[edge.y] = currentVertex;
-                }
-                edge = edge.next;
-            }
-
-        }
-        return false;
-    }
-
-    // Using DFS.
-    // Focusing on Back edge processing
-    public ArrayList<Integer> findArticulationVertices(Graph g) {
-        boolean[] visited=new boolean[g.getNumberOfVertices()];
-        boolean[] articulationVertex=new boolean[g.getNumberOfVertices()];
-
-        time=-1;
-        int discoveryTime[]=new int[g.getNumberOfVertices()];
-        int lowReachable[]=new int[g.getNumberOfVertices()];
-        int parent[]=new int[g.getNumberOfVertices()];
-        for (int i = 0; i < parent.length; i++) {
-            parent[i]=-1;
-        }
-        runDfsForArticulation(g,0,visited,articulationVertex,discoveryTime,lowReachable,parent);
-        ArrayList<Integer> result=new ArrayList<>();
-        for (int i = 0; i < g.getNumberOfVertices(); i++) {
-            if(articulationVertex[i]){
-                result.add(i);
-            }
-        }
-        return result;
-    }
-
-    public void runDfsForArticulation(Graph g,int root, boolean[] visited,boolean[] articulationVertex,int[] discoveryTime,int[] lowReachable ,int[] parent){
-        if(g==null ||g.getNumberOfVertices()<1 ||root>g.getNumberOfVertices()){
-            return;
-        }
-        int children=0;
-        time++;
-        discoveryTime[root]=lowReachable[root]=time;
-        visited[root]=true;
-        EdgeNode edge=g.getEdgeList(root);
-        // discoveryTime should be when pushing in the stack and not when fetching from it.
-
-            while (edge!=null){
-                if(!visited[edge.y]){
-                    children++;
-                    parent[edge.y]=root;
-                    runDfsForArticulation(g,edge.y,visited,articulationVertex,discoveryTime,lowReachable,parent);
-                    lowReachable[root]=Math.min(lowReachable[edge.y],lowReachable[root]);
-                    // Root is an articulation vertex iff it has atleast 2 children(children means, parent of both is root)
-                    // In case of a cycle which starts from root through one neighbor and ends at root through another neighbor,
-                    // root won't have two children as DFS will mark latter as a back edge rather than child.
-                    if(parent[root]==-1 && children>1){
-                        articulationVertex[root]=true;
-                    }
-                    // <= because it will be articulation vertex even if some back edge from descendants returns to it.
-                    if(parent[root]!=-1 && lowReachable[root]>=discoveryTime[root]){
-                        System.out.println(lowReachable[root]);
-                        System.out.println(discoveryTime[root]);
-                        System.out.println("Adding "+ root);
-                        articulationVertex[root]=true;
-                    }
-                }
-                else if(parent[edge.y]!=root){
-                    System.out.println("Found visited edge from "+root+" ->"+ edge.y);
-                    lowReachable[root]=Math.min(discoveryTime[edge.y],lowReachable[root]);
-                    //lowReachable[root]=Math.min(lowReachable[edge.y],discoveryTime[root]);
-                }
-                edge=edge.next;
-            }
-    }
-
-    // Assumption: Graph should be a DAG
-
-    public ArrayList<Integer> topologicalSort(Graph g, int root){
-        if(g==null || g.getNumberOfVertices()<1)
-            return null;
-        if(root>=g.getNumberOfVertices()){
-            System.out.println("INVALID INPUT");
-            return null;
-        }
-        boolean[] visited=new boolean[g.getNumberOfVertices()];
-        int parent[]=new int[g.getNumberOfVertices()];
-        for (int i = 0; i < parent.length; i++) {
-            parent[i]=-1;
-        }
-        Stack<Integer> s=new Stack<>();
-        runDfsForTopologicalSort(g, root, visited, parent, s);
-        System.out.println("Checking for others");
-        for (int i = 0; i < g.getNumberOfVertices(); i++) {
-            if(!visited[i]){
-                runDfsForTopologicalSort(g, i, visited, parent, s);
-            }
-        }
-        ArrayList<Integer> result=new ArrayList<>();
-        while ((!s.isEmpty())){
-            result.add(s.pop());
-        }
-        return result;
-    }
-
-    public boolean runDfsForTopologicalSort(Graph g,int root, boolean[] visited,int[] parent, Stack<Integer> s){
-        visited[root]=true;
-        EdgeNode edge=g.getEdgeList(root);
-        while (edge!=null){
-            if(visited[edge.y]){
-                edge=edge.next;
-                continue;
-            }
-            parent[edge.y]=root;
-            if(runDfsForTopologicalSort(g,edge.y,visited,parent,s))
-                return true;
-            edge=edge.next;
-        }
-        s.push(root);
-        return false;
-    }
-
-
-    // Uses DFS
-    // First runs DFS to get a stack, then pops every vertex and runs DFS based on that to get SCC of that vertex.
-    public ArrayList<ArrayList<Integer>> getStronglyConnectedComponents(Graph g){
-        if(g==null || g.getNumberOfVertices()<1){
-            return null;
-        }
-        boolean[] visited=new boolean[g.getNumberOfVertices()];
-        int parent[]=new int[g.getNumberOfVertices()];
-        for (int i = 0; i < parent.length; i++) {
-            parent[i]=-1;
-        }
-        Stack<Integer> s=new Stack<>();
-        //runDfsForTopologicalSort(g, root, visited, parent, s);
-        for (int i = 0; i < g.getNumberOfVertices(); i++) {
-            if(!visited[i]){
-                runDfsForTopologicalSort(g, i, visited, parent, s);
-            }
-        }
-        System.out.println(s);
-        // s contains the DFS now.
-        // We pop one vertex from the stack one by one, if it is not visited yet then we run the DFS.
-        ArrayList<Integer> connectedComponent;
-        ArrayList<ArrayList<Integer>> result=new ArrayList<>();
-        int currentRoot;
-        Stack<Integer> s1=new Stack<>();
-        boolean[] visited1=new boolean[g.getNumberOfVertices()];
-        int parent1[]=new int[g.getNumberOfVertices()];
-        for (int i = 0; i < parent1.length; i++) {
-            parent1[i]=-1;
-        }
-        Graph g1=Graph.reverseEdges(g);
-        g1.printGraph();
-        while ((!s.isEmpty())){
-            connectedComponent=new ArrayList<>();
-            currentRoot=s.pop();
-            //System.out.println(currentRoot);
-            if(!visited1[currentRoot]){
-                runDfsForTopologicalSort(g1, currentRoot, visited1, parent1, s1);
-                //System.out.println(s);
-                while ((!s1.isEmpty())){
-                    connectedComponent.add(s1.pop());
-                }
-                result.add(connectedComponent);
-            }
-        }
-        return result;
-    }
-
-    // Runs prim's algo in O(V^2 + E), see point 4 for the justification.
-    // can be improved using binary heaps.
-    public Graph primsAlgo(Graph g, int root){
-        if(g== null || g.getNumberOfVertices()<1){
-            return null;
-        }
-        boolean inTree[]=new boolean[g.getNumberOfVertices()];
-        int distance[]=new int[g.getNumberOfVertices()];
-        int parent[]=new int[g.getNumberOfVertices()];
-
-        for (int i = 0; i < g.getNumberOfVertices(); i++) {
-            parent[i]=-1;
-            distance[i]=Integer.MAX_VALUE;
-            inTree[i]=false;
-        }
-
-        // Variables set.
-        // Starting from the root.
-
-        EdgeNode edge;
-        int i;
-        int minDistance;
-        int currentDistance=0;
-        while (!inTree[root]){
-            System.out.println(root);
-            inTree[root]=true;
-            edge=g.getEdgeList(root);
-            //point 4
-            // Here it's not V*E as not every vertex has all the edges attached to it.
-            // In any scenario, it will be E.
-            while (edge!=null){
-                if(!inTree[edge.y] && distance[edge.y]>edge.weight){
-                    parent[edge.y]=root;
-                    distance[edge.y]=edge.weight;
-                }
-                edge=edge.next;
-            }
-
-            // Let's choose the vertex with minimum distance
-            minDistance=Integer.MAX_VALUE;
-            for (i = 0; i < g.getNumberOfVertices(); i++) {
-                if(!inTree[i] && distance[i]<minDistance){
-                    minDistance=distance[i];
-                    root=i;
-                }
-            }
-        }
-
-        return createTreeFromParentArray(g,parent,distance);
-    }
-
-    // Everything will be same except we will be using heaps to fetch the next vertex to add
-    // Complexity:
-    public Graph primsAlgoUsingHeap(Graph g, int root) {
-        if (g == null || g.getNumberOfVertices() < 1) {
-            return null;
-        }
-        boolean inTree[]=new boolean[g.getNumberOfVertices()];
-        boolean inHeap[]=new boolean[g.getNumberOfVertices()];
-        int parent[]=new int[g.getNumberOfVertices()];
-
-        for (int i = 0; i < parent.length; i++) {
-            parent[i]=-1;
-            ((VertexNode)g.getVertex(i)).setDistance(Integer.MAX_VALUE);
-        }
-
-        PriorityQueue<VertexNode> heap=new PriorityQueue<>(g.getNumberOfVertices());
-
-        //heap.add(g.getVertex(root));
-        EdgeNode edge;
-        while(!inTree[root]){
-            //System.out.println("root= "+root);
-            inTree[root]=true;
-            // Adding every adjacent vertex to heap with updated distance of the vertex.
-            edge=g.getEdgeList(root);
-            while(edge!=null){
-                if(!inTree[edge.y] && ((VertexNode)g.getVertex(edge.y)).getDistance()>edge.weight){
-                    if(inHeap[edge.y]){
-                        heap.remove((VertexNode)g.getVertex(edge.y));
-                    }
-                    ((VertexNode)g.getVertex(edge.y)).setDistance(edge.weight);
-                    parent[edge.y]=root;
-                    heap.add(((VertexNode)g.getVertex(edge.y)));
-                    inHeap[edge.y]=true;
-                }
-                edge=edge.next;
-            }
-            if(heap.isEmpty())
-                break;
-            root=heap.poll().getVertex();
-        }
-        return createTreeFromParentArray(g,parent);
-    }
-
-
-    // Here distance will be picked from the Vertex node.
-    public Graph createTreeFromParentArray(Graph g,int[] parent){
-        if(parent==null || parent.length==0){
-            return null;
-        }
-        Graph g1 =new Graph(parent.length);
-
-        // Adding Vertices to graph
-        for (int i = 0; i < g.getNumberOfVertices(); i++) {
-            g1.insertVertex(g.getVertex(i));
-        }
-
-        for (int i = 0; i < g.getNumberOfVertices(); i++) {
-            if(parent[i]!=-1) {
-                g1.insertEdge(parent[i],i,((VertexNode)g.getVertex(i)).getDistance(),true);
-            }
-        }
-        return g1;
-    }
-
-    // Will use the distance array that is passed separately.
-    public Graph createTreeFromParentArray(Graph g,int[] parent, int[] distance){
-        if(parent==null || parent.length==0){
-            return null;
-        }
-        Graph g1 =new Graph(parent.length);
-
-        // Adding Vertices to graph
-        for (int i = 0; i < g.getNumberOfVertices(); i++) {
-            g1.insertVertex(g.getVertex(i));
-        }
-
-        for (int i = 0; i < g.getNumberOfVertices(); i++) {
-            if(parent[i]!=-1) {
-                g1.insertEdge(parent[i],i,distance[i],true);
-            }
-        }
-        return g1;
-    }
-
-    // Uses UnionFind data structure to run the algo.
-    public Graph kruskalAlgo(Graph g){
-        if(g== null || g.getNumberOfVertices()<1){
-            return null;
-        }
-        UnionFind set=new UnionFind(g.getNumberOfVertices());
-        //System.out.println(set);
-        EdgePair edgePairs[]=g.getEdgePairs();
-        Arrays.sort(edgePairs);
-        Graph mst=new Graph(g.getNumberOfVertices());
-        for (int i = 0; i < g.getNumberOfVertices(); i++) {
-            mst.insertVertex(g.getVertex(i));
-        }
-        for (int i = 0; i < edgePairs.length; i++) {
-            //System.out.println("Considering= "+edgePairs[i].i+" AND "+edgePairs[i].j);
-            //System.out.println("    component= "+set.find(edgePairs[i].i)+" and "+ set.find(edgePairs[i].j));
-            //System.out.println("        Same component ="+set.sameComponent(edgePairs[i].i,edgePairs[i].j));
-            if(!set.sameComponent(edgePairs[i].i,edgePairs[i].j)){
-                mst.insertEdge(edgePairs[i].i,edgePairs[i].j,edgePairs[i].weight,true);
-                set.unionSets(edgePairs[i].i,edgePairs[i].j);
-                //System.out.println("    After Union component= "+set.find(edgePairs[i].i)+" and "+ set.find(edgePairs[i].j));
-            }
-        }
-        return mst;
-    }
-
-    // Uses Heap for finding the next edge to be included.
-    // Similar to Prims algo just that Prims is local where as Dijkstra's is global, keeping track of the accummulated distance so far.
-    // Prim's care only about the distnace of the next edge to be added.
-    public Graph dijkstrasAlgo(Graph g, int root){
-        if(g== null || g.getNumberOfVertices()<1){
-            return null;
-        }
-        boolean inTree[]=new boolean[g.getNumberOfVertices()];
-        int[] parent=new int[g.getNumberOfVertices()];
-        boolean[] inHeap=new boolean[g.getNumberOfVertices()];
-        PriorityQueue<VertexNode> heap=new PriorityQueue<>(g.getNumberOfVertices());
-
-        for (int i = 0; i < g.getNumberOfVertices(); i++) {
-            parent[i]=-1;
-            ((VertexNode)g.getVertex(i)).setDistance(Integer.MAX_VALUE);
-        }
-
-        EdgeNode edge;
-        inHeap[root]=true;
-        ((VertexNode)g.getVertex(root)).setDistance(0);
-        while (!inTree[root]){
-            inTree[root]=true;
-            edge=g.getEdgeList(root);
-            while (edge!=null){
-                if(!inTree[edge.y] && ((VertexNode)g.getVertex(edge.y)).getDistance()>(edge.weight+((VertexNode)g.getVertex(root)).getDistance())){
-                    parent[edge.y]=root;
-                    if(inHeap[edge.y]){
-                        heap.remove((VertexNode)g.getVertex(edge.y));
-                    }
-                    ((VertexNode)g.getVertex(edge.y)).setDistance(edge.weight+((VertexNode)g.getVertex(root)).getDistance());
-                    heap.add((VertexNode)g.getVertex(edge.y));
-                    inHeap[edge.y]=true;
-                }
-                edge=edge.next;
-            }
-            if (heap.isEmpty())
-                break;
-            root=heap.poll().getVertex();
-        }
-        return createTreeFromParentArray(g,parent);
-    }
-
-    public int[][] floydWarshalAlgo(int[][] adjMatrix){
-        int n=adjMatrix.length; // number of vertices
-
-        int[][] weight=new int[n][n];
-        int[][] parent=new int[n][n];
-
-        // Initializing the weight matrix with initial edge values.
-        for (int i = 0; i < weight.length; i++) {
-            for (int j = 0; j < weight.length; j++) {
-                weight[i][j]=adjMatrix[i][j];
-                parent[i][j]=-1;
-            }
-        }
-        // k is just used in order to maintain an order among the vertices.
-        // Starting everything from 1 because i->i edge does not make sense here.
-        for (int k = 0; k < n; k++) {
-            for (int i = 0; i < n; i++) {
-                for (int j = 0; j < n; j++) {
-
-                    // Adding below condition because things would go -ve if we add something to Integer.MAX_VALUE (2147483647)
-                    // Also if distance is 2147483647 then we need not consider this node as it is not rechable.
-                    if((weight[i][k]==Integer.MAX_VALUE || weight[k][j]==Integer.MAX_VALUE)){
-                        System.out.println("Skipping for "+i+", "+j);
-                        continue;
-                    }
-                    if(weight[i][j]>weight[i][k]+weight[k][j]){
-                        weight[i][j]=weight[i][k]+weight[k][j];
-                        parent[i][j]=k;
-                    }
-                }
-            }
-        }
-        return weight;
-    }
-
-    public static void main(String[] args) {
-        Graph g=Graph.createDummyGraph();
-        GraphAlgo algo=new GraphAlgo();
-        ArrayList<Integer> path=algo.shortestPath(g, 0, 5);
-        System.out.println("Shortest Path is:");
-        System.out.println(path);
-
-        Graph g1=Graph.createDummyGraphUnconnected();
-        System.out.println(g1.getNumberOfVertices());
-        System.out.println(algo.numberOfConnectedComponents(g1));
-        System.out.println(algo.getConnectedComponents(g1));
-
-        System.out.println("Is colorable:");
-        System.out.println(algo.isGraphTwoColorable(g));
-
-        System.out.println("Cycle Exists");
-        System.out.println(algo.cycleExists(g));
-
-        System.out.println("Articulation Points");
-        System.out.println(algo.findArticulationVertices(g));
-
-
-        Graph dag=Graph.createDummyDAG();
-        System.out.println("===========================");
-        System.out.println("Topological Sort");
-        System.out.println(algo.topologicalSort(dag,5));
-
-        System.out.println("===========================");
-        System.out.println("getStronglyConnectedComponents");
-        System.out.println(algo.getStronglyConnectedComponents(dag));
-
-        Graph weightedGraph=Graph.createDummyWeightedGraph();
-        System.out.println("===========================");
-        System.out.println("primsAlgo");
-        weightedGraph.printWeightedGraph();
-        Graph spanningTree=algo.primsAlgo(weightedGraph,0);
-        System.out.println("After");
-        spanningTree.printWeightedGraph();
-
-        System.out.println("===========================");
-        System.out.println("primsAlgoUsingHeap");
-        weightedGraph.printWeightedGraph();
-        Graph spanningTree1=algo.primsAlgoUsingHeap(weightedGraph, 0);
-        System.out.println("After");
-        spanningTree1.printWeightedGraph();
-
-        System.out.println("===========================");
-        System.out.println("kruskalAlgo");
-        weightedGraph.printWeightedGraph();
-        Graph spanningTree2=algo.kruskalAlgo(weightedGraph);
-        System.out.println("After");
-        spanningTree2.printWeightedGraph();
-
-        System.out.println("===========================");
-        System.out.println("dijkstrasAlgo");
-        weightedGraph.printWeightedGraph();
-        Graph spanningTree3=algo.dijkstrasAlgo(weightedGraph, 0);
-        System.out.println("After");
-        spanningTree3.printWeightedGraph();
-
-
-        System.out.println("===========================");
-        System.out.println("floydWarshalAlgo");
-        weightedGraph.printWeightedGraph();
-        int[][] adjMatrix=algo.floydWarshalAlgo(weightedGraph.getAdjacencyMatrix());
-        System.out.println("After");
-
-
-        for (int i = 0; i< adjMatrix.length; i++) {
-            for (int j = 0; j < adjMatrix.length; j++) {
-                System.out.print(adjMatrix[i][j]+"  ");
-            }
-            System.out.println();
-        }
-
-
-    }
-}
